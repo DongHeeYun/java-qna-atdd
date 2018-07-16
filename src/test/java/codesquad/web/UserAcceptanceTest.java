@@ -1,7 +1,9 @@
 package codesquad.web;
 
+import codesquad.HtmlFormDataBuilder;
 import codesquad.domain.User;
 import codesquad.domain.UserRepository;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,13 @@ public class UserAcceptanceTest extends AcceptanceTest {
     @Autowired
     private UserRepository userRepository;
 
+    HtmlFormDataBuilder htmlFormDataBuilder;
+
+    @Before
+    public void setUp() {
+        htmlFormDataBuilder = HtmlFormDataBuilder.urlEncodedForm();
+    }
+
     @Test
     public void createForm() throws Exception {
         ResponseEntity<String> response = template().getForEntity("/users/form", String.class);
@@ -31,19 +40,14 @@ public class UserAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void create() throws Exception {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
         String userId = "testuser";
-        MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
-        params.add("userId", userId);
-        params.add("password", "password");
-        params.add("name", "자바지기");
-        params.add("email", "javajigi@slipp.net");
-        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(params, headers);
 
-        ResponseEntity<String> response = template().postForEntity("/users", request, String.class);
+        htmlFormDataBuilder.addParameter("userId", userId);
+        htmlFormDataBuilder.addParameter("password", "password");
+        htmlFormDataBuilder.addParameter("name", "자바지기");
+        htmlFormDataBuilder.addParameter("email", "javajigi@slipp.net");
+
+        ResponseEntity<String> response = template().postForEntity("/users", htmlFormDataBuilder.build(), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FOUND);
         assertThat(userRepository.findByUserId(userId).isPresent()).isTrue();

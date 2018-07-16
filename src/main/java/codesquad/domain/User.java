@@ -1,5 +1,6 @@
 package codesquad.domain;
 
+import codesquad.UnAuthenticationException;
 import codesquad.UnAuthorizedException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import support.domain.AbstractEntity;
@@ -124,5 +125,9 @@ public class User extends AbstractEntity {
     @Override
     public String toString() {
         return "User [userId=" + userId + ", password=" + password + ", name=" + name + ", email=" + email + "]";
+    }
+
+    public void verifyPassword(String password) throws UnAuthenticationException {
+        if(!this.password.equals(password)) throw new UnAuthenticationException();
     }
 }
